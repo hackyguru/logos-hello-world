@@ -1,0 +1,46 @@
+name: Release
+
+# Builds, signs and publishes this module's portable .lgx.
+#
+# This repo IS the module — metadata.json and flake.nix sit at the root —
+# so `module_path: .` and the upstream action reads ./metadata.json for
+# the package name and version. Bump `version` there and re-run to cut a
+# new release; a version that's already fully published is skipped unless
+# you tick "Force build".
+#
+# Variants: darwin-arm64 (Apple silicon macOS), linux-amd64, linux-arm64.
+# All three are merged by `lgx merge` into ONE multi-platform .lgx, so a
+# single download works everywhere.
+#
+# ── Signing ──────────────────────────────────────────────────────────
+# `signing_mode: inline` runs `lgx sign` in the workflow with the
+# LOGOS_SIGNING_KEY secret (Ed25519 JWK). It MUST be the key whose public
+# DID is listed under `trustedSigners` in hackyguru/logos-modules'
+# logos-repo.json, or Basecamp will treat the package as untrusted.
+#
+# ── How this reaches modules.hackyguru.com ───────────────────────────
+# The catalog lists this repo in external-modules.txt and folds every
+# .lgx asset published here into its index.json ("Augment index"). No
+# submodule, no build over there — the release assets ARE the source of
+# truth, served straight from this repo.
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: "Force build — replace the current published release if it has the same version."
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: logos-co/logos-modules-release-action/.github/workflows/release.yml@v1
+    with:
+      module_path: .
+      skip_if_published: ${{ !inputs.force_build }}
+      signing_mode: inline
+    secrets:
+      signing_key: ${{ secrets.LOGOS_SIGNING_KEY }}
