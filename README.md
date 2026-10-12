@@ -1,4 +1,10 @@
+<div align="center">
+
+<img src="icons/hello_world.png" alt="Logos Hello World logo" width="128" height="128">
+
 # Logos Hello World
+
+</div>
 
 A minimal "hello world" UI module for [Logos Basecamp](https://logos.co). It's a single QML file (no C++), packaged as an `.lgx` that shows up as a sidebar tab.
 
